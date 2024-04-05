@@ -7,8 +7,19 @@ import matplotlib.pyplot as plt
 from bettermdptools_edit.algorithms.rl import RL
 import time
 
+def plot(y,name,title,y_label="SSE",x_label="number of iteration"):
+    plt.plot(y, label=name)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(title)
+    plt.savefig(name+".png")
+    plt.clf()
 
 frozen_lake = gym.make('FrozenLake8x8-v1', render_mode=None)
+
+if 1:
+    V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=1, n_iters=2000)
+    print(t_con,"seconds to converge VI frozen lake at gamma=1, and standard epsilon")
 
 t=time.time()
 V, V_track, pi,pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=1, n_iters=2000)

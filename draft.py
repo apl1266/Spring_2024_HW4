@@ -4,7 +4,7 @@ from bettermdptools_edit.algorithms.planner import Planner
 from bettermdptools_edit.utils.plots import Plots
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 import matplotlib.pyplot as plt
-from bettermdptools.algorithms.rl import RL
+from bettermdptools_edit.algorithms.rl import RL
 import time
 
 
@@ -77,3 +77,4 @@ if 0:
     plt.plot(plochange,"r-")
     plt.show()
 
+V, V_track, pi,pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=1, n_iters=365)
