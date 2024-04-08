@@ -18,30 +18,45 @@ def plot(y,name,y_label,x_label="number of iteration"):
 frozen_lake = gym.make('FrozenLake8x8-v1', render_mode=None)
 size=(8,8)
 
+
 if 1:
-    V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=1, n_iters=2000)
-    print(t_con,"seconds to converge VI frozen lake at gamma=1, and standard epsilon")
-    print(iter_stop, "iteration to converge states values to standard epsilon")
-    print(pi_stop,"iteration to converge to stable policy")
-    Plots.values_heat_map(V, "Frozen Lake VI\nState Values gamma=1", size, "frozen_lake_VI_V_Gamma_1.png")
-    Plots.values_heat_map(np.array(list(pi.values())).reshape((8, 8)), "Frozen Lake VI\npolicy gamma=1",size, "frozen_lake_VI_P_Gamma_1.png")
+    for alg in ("VI","PI"):
+        print("--------------------")
+        print(alg+" data bellow")
+        print("--------------------")
+        for g in [(1,"1"),(0.99,"099"),(0.9,"09"),(0.3,"03")]:
+            print("--------------------")
+            if alg=="VI":
+                V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=g[0], n_iters=2000)
+            else:
+                V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).policy_iteration(gamma=g[0],n_iters=40,seed=812)
+            print(t_con, "seconds to converge "+alg+" frozen lake at gamma="+g[1]+", and standard epsilon")
+            print(iter_stop, "iteration to converge states values to standard epsilon")
+            print(pi_stop, "iteration to converge to stable policy")
+            Plots.values_heat_map(V, "Frozen Lake VI\nState Values gamma="+g[1]+"", size, "frozen_lake_"+alg+"_V_Gamma_"+g[1]+".png")
+            Plots.values_heat_map(np.array(list(pi.values())).reshape((8, 8)), "Frozen Lake "+alg+"\npolicy gamma="+g[1], size,
+                                  "frozen_lake_VI_P_Gamma_"+g[1]+".png")
 
-    plochange = []
-    for i in range(V_track.shape[0]):
-        plochange.append(np.sum(V_track[i])/64)
-    plot(plochange,"frozen_lake_VI_mean_state_values_gamma_1","mean state value")
+            plochange = []
+            for i in range(V_track.shape[0]):
+                plochange.append(np.sum(V_track[i]) / 64)
+            plot(plochange, "frozen_lake_"+alg+"_mean_state_values_gamma_"+g[1], "mean state value")
 
-    plochange = []
-    for i in range(len(pi_track)):
-        mat = np.abs(
-            np.array(list(pi_track[i].values())).reshape((8, 8)) - np.array(list(pi_track[-1].values())).reshape((8, 8)))
-        mat_edit = mat
-        mat_edit[mat > 1] = 1
-        plochange.append(np.sum(mat_edit))
-    plot(plochange, "frozen_lake_VI_policy_gamma_1", "number of varied states from converged policy")
+            plochange = []
+            for i in range(len(pi_track)):
+                mat = np.abs(
+                    np.array(list(pi_track[i].values())).reshape((8, 8)) - np.array(list(pi_track[-1].values())).reshape(
+                        (8, 8)))
+                mat_edit = mat
+                mat_edit[mat > 1] = 1
+                plochange.append(np.sum(mat_edit))
+            plot(plochange, "frozen_lake_"+alg+"_policy_gamma_"+g[1], "number of varied states from converged policy")
 
-    V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=1, n_iters=pi_stop)
-    print(t_con, "seconds to converge VI frozen lake at gamma=1, and standard epsilon until stable policy")
+            if alg == "Vi":
+                V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=g[0], n_iters=pi_stop)
+            else:
+                V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).policy_iteration(gamma=g[0],n_iters=pi_stop,seed=812)
+            print(t_con, "seconds to converge "+alg+" frozen lake at gamma="+g[1]+", and standard epsilon until stable policy")
 
 
 
