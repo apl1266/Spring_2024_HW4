@@ -84,7 +84,7 @@ class RL:
                    init_epsilon=1.0,
                    min_epsilon=0.1,
                    epsilon_decay_ratio=0.9,
-                   n_episodes=10000):
+                   n_episodes=10000, seed=None):
         """
         Parameters
         ----------------------------
@@ -140,11 +140,17 @@ class RL:
         pi_track {list}, len(n_episodes):
             Log of complete policy for each episode
         """
+
+        if type(seed)!=type(None):
+            np.random.seed(seed)
+
         if nS is None:
             nS=self.env.observation_space.n
         if nA is None:
             nA=self.env.action_space.n
         pi_track = []
+        #v_track = np.zeros((n_episodes, len(self.P)), dtype=np.float64)
+        v_track=[]
         Q = np.zeros((nS, nA), dtype=np.float64)
         Q_track = np.zeros((n_episodes, nS, nA), dtype=np.float64)
         # Explanation of lambda:
@@ -186,13 +192,15 @@ class RL:
                 state = next_state
             Q_track[e] = Q
             pi_track.append(np.argmax(Q, axis=1))
+            #v_track[e]=np.max(Q, axis=1)
+            v_track.append(np.sum(np.max(Q, axis=1)))
             self.render = False
             self.callbacks.on_episode_end(self)
 
         V = np.max(Q, axis=1)
 
         pi = {s: a for s, a in enumerate(np.argmax(Q, axis=1))}
-        return Q, V, pi, Q_track, pi_track
+        return Q, V, pi, Q_track, pi_track,v_track
 
     @print_runtime
     def sarsa(self,
@@ -206,7 +214,7 @@ class RL:
               init_epsilon=1.0,
               min_epsilon=0.1,
               epsilon_decay_ratio=0.9,
-              n_episodes=10000):
+              n_episodes=10000, seed=None):
         """
         Parameters
         ----------------------------
@@ -262,6 +270,9 @@ class RL:
         pi_track {list}, len(n_episodes):
             Log of complete policy for each episode
         """
+        if type(seed)!=type(None):
+            np.random.seed(seed)
+
         if nS is None:
             nS = self.env.observation_space.n
         if nA is None:
