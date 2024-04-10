@@ -35,6 +35,33 @@ def plot3(y,yy,name,y_label,x_label="number of iteration"):
     plt.savefig(name+".png")
     plt.clf()
 
+def plot4(x,y,yy,name,y_label,x_label="gamma"):
+    plt.plot(x,y,"-o", label="State Values convergence")
+    plt.plot(x,yy,"-o", label="Policy convergence")
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(name)
+    plt.legend()
+    plt.savefig(name+".png")
+    plt.clf()
+
+def plot5(y,name,y_label,x_label="number of iteration"):
+    plt.plot(y[0], label="gamma=1, epsilon=1, alpha=0.1")
+    plt.plot(y[1], label="gamma=1, epsilon=0.5, alpha=0.1")
+    plt.plot(y[2], label="gamma=1, epsilon=0.45, alpha=0.1")
+    plt.plot(y[3], label="gamma=1, epsilon=0.5, alpha=0.3")
+    plt.plot(y[4], label="gamma=1, epsilon=0.5, alpha=0.03")
+    plt.plot(y[5], label="gamma=0.9, epsilon=0.5, alpha=0.1")
+    plt.plot(y[6], label="gamma=0.3, epsilon=0.5, alpha=0.1")
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(name)
+    plt.legend()
+    plt.savefig(name+".png")
+    plt.clf()
+
+
+
 frozen_lake = gym.make('FrozenLake8x8-v1', render_mode=None)
 size=(8,8)
 
@@ -55,6 +82,14 @@ if 1:
                 V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).value_iteration(gamma=g[0], n_iters=2000)
             else:
                 V, V_track, pi, pi_track, iter_stop, pi_stop, t_con = Planner(frozen_lake.P).policy_iteration(gamma=g[0],n_iters=40,seed=812)
+                if g[0]==0.3:
+                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    print(V[0],"value of start state at PI and gamma=0.3")
+                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
             v_t.append(t_con)
             v_i.append(iter_stop)
             p_i.append(pi_stop)
@@ -89,6 +124,10 @@ if 1:
         plot2(xx, v_i, "frozen_lake_" + alg + "_value_convergence_iterations", "iterations to converged converged values","gamma")
         plot2(xx, p_i, "frozen_lake_" + alg + "_policy_convergence_iterations", "iterations to converged converged policy","gamma")
 
+V_V=[]
+P_P=[]
+P_P_t=[]
+
 if 1:
     iters=300000
 
@@ -106,6 +145,8 @@ if 1:
             plochange.append(V_track[i]/ 64)
         plot(plochange, "frozen_lake_Q_Learning_mean_state_values_gamma_1_epsilon_"+e[1]+"_alpha_01", "mean state value")
 
+        V_V.append(plochange)
+
         plochange = []
         for i in range(len(pi_track)):
             mat = np.abs(pi_track[i]-pi_track[-1])
@@ -113,6 +154,7 @@ if 1:
             mat_edit[mat > 1] = 1
             plochange.append(np.sum(mat_edit))
         #plot(plochange, "frozen_lake_Q_Learning_policy_gamma_1", "number of varied states from converged policy")
+
 
         plochange_t = []
         for i in range(len(pi_track)):
@@ -122,6 +164,9 @@ if 1:
             plochange_t.append(np.sum(mat_edit))
         #plot(plochange_t, "frozen_lake_Q_Learning_true_policy_gamma_1", "number of varied states from converged to true policy")
         plot3(plochange,plochange_t, "frozen_lake_Q_Learning_policy_gamma_1_epsilon_"+e[1]+"_alpha_01", "number of varied states from converged(true) policy")
+
+        P_P.append(plochange)
+        P_P_t.append(plochange_t)
 
 if 1:
     iters=300000
@@ -140,6 +185,8 @@ if 1:
             plochange.append(V_track[i]/ 64)
         plot(plochange, "frozen_lake_Q_Learning_mean_state_values_gamma_1_epsilon_05_alpha_"+a[1], "mean state value")
 
+        V_V.append(plochange)
+
         plochange = []
         for i in range(len(pi_track)):
             mat = np.abs(pi_track[i]-pi_track[-1])
@@ -156,6 +203,9 @@ if 1:
             plochange_t.append(np.sum(mat_edit))
         #plot(plochange_t, "frozen_lake_Q_Learning_true_policy_gamma_1", "number of varied states from converged to true policy")
         plot3(plochange,plochange_t, "frozen_lake_Q_Learning_policy_gamma_1_epsilon_05_alpha_"+a[1], "number of varied states from converged(true) policy")
+
+        P_P.append(plochange)
+        P_P_t.append(plochange_t)
 
 
 if 1:
@@ -175,6 +225,8 @@ if 1:
             plochange.append(V_track[i]/ 64)
         plot(plochange, "frozen_lake_Q_Learning_mean_state_values_gamma_"+g[1]+"_epsilon_05_alpha_0.1", "mean state value")
 
+        V_V.append(plochange)
+
         plochange = []
         for i in range(len(pi_track)):
             mat = np.abs(pi_track[i]-pi_track[-1])
@@ -191,6 +243,13 @@ if 1:
             plochange_t.append(np.sum(mat_edit))
         #plot(plochange_t, "frozen_lake_Q_Learning_true_policy_gamma_1", "number of varied states from converged to true policy")
         plot3(plochange,plochange_t, "frozen_lake_Q_Learning_policy_gamma_"+g[1]+"_epsilon_05_alpha_0.1", "number of varied states from converged(true) policy")
+
+        P_P.append(plochange)
+        P_P_t.append(plochange_t)
+
+    plot5(V_V, "frozen_lake_Q_Learning_mean_state_values_convergence","mean state value")
+    plot5(P_P, "frozen_lake_Q_Learning_convergence_to_final_policy", "number of varied states from converged policy")
+    plot5(P_P_t, "frozen_lake_Q_Learning_convergence_to_true_policy", "number of varied states from true policy")
 
 
 
